@@ -1,0 +1,207 @@
+/* Custom CSS for Calendar */
+
+#calendar {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#calendar .day {
+    flex: 1 0 14%;
+    border: 1px solid #ddd;
+    padding: 10px;
+    box-sizing: border-box;
+    height: 100px;
+}
+
+#calendar .day header {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+body #login-page {
+    background-image: url('../images/login.jpg');
+    background-color: #f2f2f2;
+    font-family: Arial, sans-serif;
+    background-size: cover;
+    background-position: center;
+}
+
+body #home-page {
+    background-image: url('../images/home.jpg');
+    font-family: Arial, sans-serif;
+    background-size: cover;
+    background-position: center;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-form {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.login-form h2 {
+    margin-bottom: 30px;
+    font-weight: 700;
+    color: #333;
+}
+
+.form-control {
+    border-radius: 20px;
+    height: 45px;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #007bff;
+}
+
+.btn-primary {
+    border-radius: 20px;
+    height: 45px;
+    font-weight: bold;
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.form-check-label {
+    margin-left: 5px;
+    font-size: 14px;
+}
+
+.text-center a {
+    color: #007bff;
+}
+
+.text-center a:hover {
+    text-decoration: underline;
+}
+
+.list-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.list-item .card {
+    margin: 20px;
+    flex: 1 1 calc(33.333% - 30px);
+    max-width: calc(33.333% - 30px);
+    box-sizing: border-box;
+}
+
+.card img {
+    width: 100%;
+    height: auto;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.navbar-nav .nav-link {
+    color: #333;
+    font-weight: bold;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #007bff;
+}
+
+.navbar-toggler-icon {
+    border-color: #333;
+}
+
+.navbar-toggler:focus {
+    outline: none;
+}
+
+.navbar-toggler:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .navbar-nav {
+        margin-top: 10px;
+    }
+
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+}
+
+#header {
+    background-color: rgb(248, 249, 250);
+}
+
+#monthly {
+    padding: 20px;
+    color: rgb(255, 255, 255);
+}
+
+#updateBtn {
+    border-radius: 5px;
+    height: 38px;
+}
+
+#button-add {
+    margin-left: 20px;
+}
+
+#home-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+#logoText{
+    color: #117df2;
+}
+#logo{
+    text-shadow: 2px 2px 8px #163fe2;
+    text-transform: uppercase;
+}
+#login{
+    color: #117df2;
+}
+
+#btnLogin {
+    display: inline-block;
+    
+    padding: 10px 20px;
+    background-color: #007bff;
+    /* Màu nền của nút */
+    color: white;
+    /* Màu chữ */
+    text-decoration: none;
+    /* Bỏ gạch chân của liên kết */
+    border-radius: 30px;
+    /* Bo tròn góc nút */
+    text-align: center;
+    /* Căn giữa văn bản trong nút */
+    transition: background-color 0.3s ease;
+    /* Hiệu ứng chuyển đổi màu nền */
+    margin-left: 37%;
+}
+
+#btnLogin:hover {
+    background-color: #0056b3;
+    /* Màu nền khi di chuột qua */
+}
