@@ -81,7 +81,7 @@ const Home = () => {
             })
             .catch((error) => console.log(error));
     };
-    //Gọi api render giao diện
+    //Gọi api render item 
     useEffect(() => {
         renderTask();
     }, []);
