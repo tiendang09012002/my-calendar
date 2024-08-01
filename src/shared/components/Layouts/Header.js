@@ -4,17 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 const Header = () => {
     const logged = useSelector(({ Auth }) => Auth.login.logged)
-    const FullName = useSelector(({ Auth }) => Auth.login.userCurrent?.data?.FullName);
+    const FullName = useSelector(({ Auth }) => Auth.login.userCurrent?.data?.full_name);
     const dispatch = useDispatch();
     const navigate = useNavigate()
 
     //Hàm xử lý sự kiện logout
     const clickLogout = (e) => {
         e.preventDefault();
-        dispatch(loggedOut())
-        navigate("/Login")
-        
-    }
+        dispatch(loggedOut());
+        navigate("/Login");  
+    };
     return (
         <div className="container" id="header">
             {/* Navigation Bar */}
@@ -42,7 +41,7 @@ const Header = () => {
                                         <a className="nav-link" id="login" href="/Login">Login</a>
                                     </li>
                                     <li className="nav-item">
-                                        <a className="nav-link" href="#">Sign Up</a>
+                                        <a className="nav-link" href="/Register">Sign Up</a>
                                     </li>
                                 </>
 

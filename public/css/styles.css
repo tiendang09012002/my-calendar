@@ -1,207 +1,319 @@
 /* Custom CSS for Calendar */
 
 #calendar {
-    display: flex;
-    flex-wrap: wrap;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #calendar .day {
-    flex: 1 0 14%;
-    border: 1px solid #ddd;
-    padding: 10px;
-    box-sizing: border-box;
-    height: 100px;
+  flex: 1 0 14%;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-sizing: border-box;
+  height: 100px;
 }
 
 #calendar .day header {
-    font-weight: bold;
-    margin-bottom: 10px;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-body #login-page {
-    background-image: url('../images/login.jpg');
-    background-color: #f2f2f2;
-    font-family: Arial, sans-serif;
-    background-size: cover;
-    background-position: center;
+body #login-page,
+body #register-page {
+  background-image: url("../images/login.jpg");
+  background-color: #f2f2f2;
+  font-family: Arial, sans-serif;
+  background-size: cover;
+  background-position: center;
 }
 
 body #home-page {
-    background-image: url('../images/home.jpg');
-    font-family: Arial, sans-serif;
-    background-size: cover;
-    background-position: center;
+  background-image: url("../images/home.jpg");
+  font-family: Arial, sans-serif;
+  background-size: cover;
+  background-position: center;
 }
 
-.login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+.login-container,
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.login-form {
-    background: white;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-    width: 100%;
+.login-form,
+.register-form {
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
 }
 
-.login-form h2 {
-    margin-bottom: 30px;
-    font-weight: 700;
-    color: #333;
+.login-form h2,
+.register-form h2 {
+  margin-bottom: 30px;
+  font-weight: 700;
+  color: #333;
 }
 
 .form-control {
-    border-radius: 20px;
-    height: 45px;
+  border-radius: 20px;
+  height: 45px;
 }
 
 .form-control:focus {
-    box-shadow: none;
-    border-color: #007bff;
+  box-shadow: none;
+  border-color: #007bff;
 }
 
 .btn-primary {
-    border-radius: 20px;
-    height: 45px;
-    font-weight: bold;
-    background-color: #007bff;
-    border: none;
+  border-radius: 20px;
+  height: 45px;
+  font-weight: bold;
+  background-color: #007bff;
+  border: none;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 .form-check-label {
-    margin-left: 5px;
-    font-size: 14px;
+  margin-left: 5px;
+  font-size: 14px;
 }
 
 .text-center a {
-    color: #007bff;
+  color: #007bff;
 }
 
 .text-center a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .list-item {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    width: 100%;
-    padding: 20px;
-    box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .list-item .card {
-    margin: 20px;
-    flex: 1 1 calc(33.333% - 30px);
-    max-width: calc(33.333% - 30px);
-    box-sizing: border-box;
+  margin: 20px;
+  flex: 1 1 calc(25% - 30px);
+  max-width: calc(25% - 30px);
+  box-sizing: border-box;
 }
 
 .card img {
-    width: 100%;
-    height: auto;
+  width: 100%;
+  height: auto;
 }
 
 .navbar-brand {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .navbar-nav .nav-link {
-    color: #333;
-    font-weight: bold;
+  color: #333;
+  font-weight: bold;
 }
 
 .navbar-nav .nav-link:hover {
-    color: #007bff;
+  color: #007bff;
 }
 
 .navbar-toggler-icon {
-    border-color: #333;
+  border-color: #333;
 }
 
 .navbar-toggler:focus {
-    outline: none;
+  outline: none;
 }
 
 .navbar-toggler:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
-    .navbar-nav {
-        margin-top: 10px;
-    }
+  .navbar-nav {
+    margin-top: 10px;
+  }
 
-    .navbar-toggler-icon {
-        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-    }
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
 }
 
 #header {
-    background-color: rgb(248, 249, 250);
+  background-color: rgb(248, 249, 250);
 }
 
 #monthly {
-    padding: 20px;
-    color: rgb(255, 255, 255);
+  padding: 20px;
+  color: rgb(255, 255, 255);
 }
 
 #updateBtn {
-    border-radius: 5px;
-    height: 38px;
+  border-radius: 5px;
+  height: 38px;
 }
 
 #button-add {
-    margin-left: 20px;
+  margin-left: 20px;
 }
 
 #home-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+#logoText {
+  color: #6fbeef;
+}
+
+#logo {
+  text-shadow: 2px 2px 8px #0ed58f;
+  text-transform: uppercase;
+}
+
+#login {
+  color: #117df2;
+}
+
+#btnLogin,
+#btnRegister {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 30px;
+  text-align: center;
+  transition: background-color 0.3s ease;
+  margin-left: 37%;
+}
+
+#btnLogin:hover,
+#btnRegister:hover {
+  background-color: #0056b3;
+}
+
+.delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  background: none;
+  color: #dc3545;
+  font-size: 30px;
+  cursor: pointer;
+}
+.edit-button {
+  width: 60px;
+  display: block;
+  margin: 0 0 10px 10px;
+  border-radius: 5px;
+}
+
+.card {
+  position: relative;
+  cursor: pointer;
+  border-radius: 10px;
+
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 5px 10px;
+  color: white;
+}
+
+.modal-content {
+  border-radius: 8px;
+}
+
+.modal-header,
+.modal-footer {
+  border: none;
+}
+
+/* General button styling */
+.btn-search {
+  padding: 8px 15px;
+  border-radius: 0 5px 5px 0;
+  font-size: 14px;
+  color:white;
+  background-color: #14b03b;
+  box-shadow: none;
+}
+
+/* Add Task Button */
+#button-add {
+  margin-bottom: 20px;
+}
+
+/* Search Input Group */
+
+/* Date Picker Container */
+.date-picker-container {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.date-picker-container label {
+  color: #ffffff;
+  font-weight: 500;
+  margin-left: 30px;
+}
+
+.date-picker-container input {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+}
+
+.date-picker-container button {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: #14b03b;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.date-picker-container button:hover {
+  background-color: #0056b3;
+}
+
+.search-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Di chuyển trở về giữa */
+  text-align: center;
 }
-#logoText{
-    color: #117df2;
-}
-#logo{
-    text-shadow: 2px 2px 8px #163fe2;
-    text-transform: uppercase;
-}
-#login{
-    color: #117df2;
-}
-
-#btnLogin {
-    display: inline-block;
-    
-    padding: 10px 20px;
-    background-color: #007bff;
-    /* Màu nền của nút */
-    color: white;
-    /* Màu chữ */
-    text-decoration: none;
-    /* Bỏ gạch chân của liên kết */
-    border-radius: 30px;
-    /* Bo tròn góc nút */
-    text-align: center;
-    /* Căn giữa văn bản trong nút */
-    transition: background-color 0.3s ease;
-    /* Hiệu ứng chuyển đổi màu nền */
-    margin-left: 37%;
-}
-
-#btnLogin:hover {
-    background-color: #0056b3;
-    /* Màu nền khi di chuột qua */
+.inputsearch {
+  width: 200px;
+  padding: 5px 10px;
+  /* Điều chỉnh padding nếu cần thiết */
+  font-size: 14px;
+  /* Điều chỉnh kích thước font chữ nếu cần thiết */
+  border-radius: 5px 0 0 5px;
+  /* Bo góc cho thẻ input */
+  border: 1px solid #ccc;
+  /* Đường viền */
 }

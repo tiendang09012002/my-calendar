@@ -5,28 +5,35 @@ import { loginSuccess } from "../../redux-setup/reducers/auth"
 import { useDispatch } from "react-redux"
 const Login = () => {
     const [inputUser, setInputUser] = useState({})
-    const [error, setError] = useState(false)
+    console.log(inputUser);
+    const [message,setMessage] = useState("");
     const navigate = useNavigate();
     const dispatch = useDispatch();
     //Hàm thay đổi giá trị input trong form
     const changeInputsUser = ({ target: { value, name } }) => {
-        setInputUser({
-            ...inputUser,
-            [name]: value
-        })
-        setError(false)
+        try {
+            return setInputUser({
+                ...inputUser,
+                [name]: value
+            });
+        } catch (error) {
+            return console.log(error);
+        }
     }
     //Hàm xử ký sự kiện login
-    const clickLogin = (e) => {
+    const clickLogin = async (e) => {
         e.preventDefault();
-        loginUser(inputUser)
-            .then(({ data }) => {
-                dispatch(loginSuccess(data))
-                return navigate("/")
-            })
-            .catch((error) => {
-                setError(true)
-            })
+        try {
+            const {data} = await loginUser(inputUser);
+            if(!data){
+                return setMessage("Invalid email or password");
+            }
+            dispatch(loginSuccess(data));
+            return navigate("/");
+        } catch (error) {
+            setMessage("Tài khoản hoặc mật khẩu không chính xác!");
+            return console.log(error);
+        }   
     }
     return (
         <div className="container" id="login-page">
@@ -36,12 +43,17 @@ const Login = () => {
                     <form>
                         <div className="form-group">
                             <label htmlFor="email">Email</label>
-                            <input onChange={changeInputsUser} type="email" className="form-control" name="Email"  aria-describedby="emailHelp" placeholder="Enter email" />
+                            <input onChange={changeInputsUser} type="email" className="form-control" name="email" aria-describedby="emailHelp" placeholder="Enter email" />
                         </div>
                         <div className="form-group">
                             <label htmlFor="password">Password</label>
-                            <input onChange={changeInputsUser} type="password" className="form-control" name="Password" placeholder="Enter password" />
+                            <input onChange={changeInputsUser} type="password" className="form-control" name="password" placeholder="Enter password" />
                         </div>
+                        {
+                            message?
+                            <p style={{color: "red"}}>{message}</p>
+                            : null
+                        }
                         <a id="btnLogin" href="#">
                             <b onClick={clickLogin}>Login</b>
                         </a>

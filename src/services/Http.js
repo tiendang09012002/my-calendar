@@ -2,11 +2,6 @@ import axios from "axios";
 import { BASE_API } from "../shared/constants/app";
 const Http = axios.create({
     baseURL: BASE_API,
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json; charset=utf-8',
-        //'Content-Type': 'multipart/form-data',
-    },
     maxRedirects: 0
 });
 
