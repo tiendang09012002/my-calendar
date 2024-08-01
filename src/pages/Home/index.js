@@ -5,6 +5,10 @@ import { getUserTasks, deleteTask, updateTask, addTask, searchTask, addResultTas
 import Pagination from "../../shared/components/Pagination";
 import PaginationResult from "../../shared/components/Pagination-Result";
 import moment from "moment";
+import { toast } from "react-toastify";
+import ResultModal from "../../shared/components/ResultModal";
+import EditTaskModal from "../../shared/components/EditTaskModal";
+import AddTaskModal from "../../shared/components/AddTaskModal";
 
 const Home = () => {
     // const userID = useSelector(({ Auth }) => Auth.login.userCurrent?.data?._id);
@@ -13,10 +17,12 @@ const Home = () => {
     const keyword = searchParams.get('name')
     const page = searchParams.get('page') || 1;
     const filter = searchParams.get('filter') || '';
+    const sort = searchParams.get('sort_created_at') || '';
+    const [sortResult, setSortResult] = React.useState("");
     const [filterResult, setFilterResult] = React.useState("");
     const [pages, setPages] = React.useState({});
     const [total, setTotal] = React.useState(0);
-    const [currentPage, setCurrentPage] = useState(0);
+    const [currentPage, setCurrentPage] = useState("");
     const [pagesResult, setPagesResult] = React.useState({});
     const [totalResult, setTotalResult] = React.useState(0);
     const [selectedTask, setSelectedTask] = useState(null);
@@ -64,6 +70,7 @@ const Home = () => {
             setTotal(data.pagination.totalPages);
             return;
         } catch (error) {
+            toast(error.message);
             return console.log(error);
         }
     }
@@ -71,8 +78,24 @@ const Home = () => {
     * Thay đổi trang hiện tại.
     * @param {number} page - Số trang cần chuyển đến.
     */
-    const handlePageChange = (page) => {
-        return setCurrentPage(page);
+    const handlePageChange = async (page) => {
+        try {
+            const { data } = await resultTask(selectedTask._id, {
+                params: {
+                    limit: 2,
+                    outcome: filterResult || "",
+
+                    page
+                }
+            });
+            setEditingResults(data.data);
+            setPagesResult(data.paginationInfo);
+            setTotalResult(data.paginationInfo.total_page);
+            return;
+        } catch (error) {
+            toast(error.message);
+            console.log(error.message);
+        }
     };
 
     /**
@@ -81,8 +104,11 @@ const Home = () => {
      */
     const handleDeleteResult = async (result) => {
         try {
-            return await deleteResult(result._id);
+            await deleteResult(result._id);
+            toast("Delete Success!");
+            return;
         } catch (error) {
+            toast(error.message);
             return console.log(error.message);
         }
     };
@@ -100,6 +126,7 @@ const Home = () => {
             );
             return setEditingResults(updatedResults);
         } catch (error) {
+            toast(error.message);
             return console.log(error);
         }
     };
@@ -116,6 +143,7 @@ const Home = () => {
                 formData.append('score', result.score);
                 await saveEditResult(result._id, formData);
                 renderTask();
+                toast("Save Success!")
                 return;
             }
         } catch (error) {
@@ -201,8 +229,10 @@ const Home = () => {
             console.log(task._id);
             await deleteTask(task._id, { delete_by: userId });
             renderTask();
+            toast("Delete Success!")
             return;
         } catch (error) {
+            toast(error.message)
             return console.log(error);
         }
     };
@@ -214,9 +244,9 @@ const Home = () => {
     const handleButtonClick = async (task) => {
         try {
             console.log(task._id);
-            const { data } = await resultTask(task._id,{
+            const { data } = await resultTask(task._id, {
                 params: {
-                    limit: 2
+                    limit: 2,
                 }
             });
             console.log(data);
@@ -236,19 +266,41 @@ const Home = () => {
         const newFilter = e.target.value;
         setFilterResult(newFilter);
         try {
-            const { data } = await resultTask(selectedTask._id,{
+            const { data } = await resultTask(selectedTask._id, {
                 params: {
                     limit: 2,
                     outcome: newFilter,
+                    sort_created_at: sortResult,
                 }
             });
             setEditingResults(data.data);
             setPagesResult(data.paginationInfo);
             setTotalResult(data.paginationInfo.total_page);
+            return;
         } catch (error) {
+            toast("error.message", error)
             console.log(error.message);
         }
     };
+    const handleSortChange = async (e) => {
+        const newSort = e.target.value;
+        setSortResult(newSort);
+        try {
+            const { data } = await resultTask(selectedTask._id, {
+                params: {
+                    limit: 2,
+                    sort_created_at: newSort,
+                    outcome: filterResult,
+                }
+            });
+            setEditingResults(data.data);
+            setPagesResult(data.paginationInfo);
+            setTotalResult(data.paginationInfo.total_page);
+            return;
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
 
     /**
      * Thay đổi giá trị trong input của nhiệm vụ được chọn.
@@ -373,8 +425,10 @@ const Home = () => {
             const { data } = await addTask(formData);
             setTasksUser((tasksUser) => [...tasksUser, data]);
             setNewTask({ name: "", desc: "", deadline: moment().format('YYYY-MM-DDTHH:mm'), image: null, tags: [] });
+            toast("Add successfully!");
             return renderTask();
         } catch (error) {
+            toast(error.message);
             return console.log(error.message);
         }
     };
@@ -389,8 +443,10 @@ const Home = () => {
             const { data } = await updateTask(selectedTask._id, selectedTask);
             const updatedTasks = tasksUser.map((task) => (task._id === data._id ? data : task));
             setTasksUser(updatedTasks);
+            toast("Update task success!");
             return renderTask();
         } catch (error) {
+            toast(error.message);
             return console.log(error);
         }
     };
@@ -412,8 +468,10 @@ const Home = () => {
                 score: '',
                 createdAt: new Date().toISOString().slice(0, 16)
             });
+            toast("Add result successfully!");
             return renderTask();
         } catch (error) {
+            toast(error.message);
             return console.log(error);
         }
     };
@@ -469,425 +527,100 @@ const Home = () => {
             </div>
 
             <div className="date-picker-container">
-                <label htmlFor="start-date">Ngày bắt đầu:</label>
+                <label htmlFor="start-date">Start Date:</label>
                 <input onChange={handleStartDateChange} type="date" id="start-date" name="start-date" />
-                <label htmlFor="end-date">Ngày kết thúc:</label>
+                <label htmlFor="end-date">End Date:</label>
                 <input onChange={handleEndDateChange} type="date" id="end-date" name="end-date" />
                 <button onClick={handleClickFilter}>Lọc</button>
             </div>
 
             {/* Modal for Add Event */}
-            <div className="modal fade" id="eventModal" tabIndex={1} role="dialog" aria-labelledby="eventModalLabel" aria-hidden="true">
-                <div className="modal-dialog" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="eventModalLabel">Add/Edit Event</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">×</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <form>
-                                <div className="form-group">
-                                    <label htmlFor="eventTitle">Task Title</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="name"
-                                        id="eventTitle"
-                                        value={newTask.name}
-                                        onChange={handleNewTaskChange}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="eventDateTime">Task Date and Time</label>
-                                    <input
-                                        type="datetime-local"
-                                        className="form-control"
-                                        id="eventDateTime"
-                                        name="deadline"
-                                        value={newTask.deadline}
-                                        onChange={handleNewTaskChange}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="taskImage">Image</label>
-                                    <input
-                                        name="image"
-                                        className="form-control"
-                                        id="taskImage"
-                                        type="file"
-                                        onChange={handleFileChange}
-                                    />
-                                    {previewImage && (
-                                        <img
-                                            src={previewImage}
-                                            className="card-img-top img-fluid"
-                                            style={{ display: "block", height: "200px", borderRadius: "10px 10px 0 0" }}
-                                            alt="Preview"
-                                        />
-                                    )}
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="taskDesc">Description</label>
-                                    <textarea
-                                        className="form-control"
-                                        id="taskDesc"
-                                        name="desc"
-                                        value={newTask.desc}
-                                        onChange={handleNewTaskChange}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Tags</label>
-                                    <div>
-                                        {newTask.tags.map((tag, index) => (
-                                            <div className="d-flex align-items-center mb-2" key={index}>
-                                                <input
-                                                    type="text"
-                                                    className="form-control mr-2"
-                                                    value={tag}
-                                                    onChange={(e) => handleNewTagChange(e, index)}
-                                                />
-                                                {index === newTask.tags.length - 1 && (
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-secondary"
-                                                        onClick={addNewTagInput}
-                                                    >
-                                                        +
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <button onClick={addNewTagInput} className="btn btn-secondary mt-2">Add Tag</button>
-                                </div>
-                            </form>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button onClick={clickAddTask} type="button" className="btn btn-primary" data-dismiss="modal" id="saveEvent">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <AddTaskModal newTask={newTask} handleNewTaskChange={handleNewTaskChange} handleFileChange={handleFileChange} previewImage={previewImage} handleNewTagChange={handleNewTagChange} addNewTagInput={addNewTagInput} clickAddTask={clickAddTask} />
 
             {/* Modal for Edit Event */}
-            <div className="modal fade" id="editEventModal" tabIndex={1} role="dialog" aria-labelledby="eventModalLabel" aria-hidden="true">
-                <div className="modal-dialog" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="eventModalLabel">Add/Edit Event</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">×</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            {
-                                selectedTask && (<form>
-                                    <div className="form-group">
-                                        <label htmlFor="eventTitle">Task Title</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="name"
-                                            id="eventTitle"
-                                            value={selectedTask.name}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="eventDateTime">Task Date and Time</label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control"
-                                            id="eventDateTime"
-                                            name="deadline"
-                                            value={selectedTask.deadline}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="taskImage">Image</label>
-                                        <input
-                                            name="image"
-                                            className="form-control"
-                                            id="taskImage"
-                                            type="file"
-                                            onChange={handleFileChange}
-                                        />
-                                        {previewImage && (
-                                            <img
-                                                src={previewImage}
-                                                className="card-img-top img-fluid"
-                                                style={{ display: "block", height: "200px", borderRadius: "10px 10px 0 0" }}
-                                                alt="Preview"
-                                            />
-                                        )}
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="taskDesc">Description</label>
-                                        <textarea
-                                            className="form-control"
-                                            id="taskDesc"
-                                            name="desc"
-                                            value={selectedTask.desc}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Tags</label>
-                                        <div>
-                                            {selectedTask.tags.map((tag, index) => (
-                                                <div className="d-flex align-items-center mb-2" key={index}>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control mr-2"
-                                                        value={tag}
-                                                        onChange={(e) => handleTagChange(e, index)}
-                                                    />
-                                                    {index === selectedTask.tags.length - 1 && (
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-secondary"
-                                                            onClick={addTagInput}
-                                                        >
-                                                            +
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <button onClick={addTagInput} className="btn btn-secondary mt-2">Add Tag</button>
-                                    </div>
-                                </form>)
-                            }
+            <EditTaskModal selectedTask={selectedTask} handleInputChange={handleInputChange} handleFileChange={handleFileChange} previewImage={previewImage} addTagInput={addTagInput} clickUpdateTask={clickUpdateTask} handleTagChange={handleTagChange} />
 
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button onClick={clickUpdateTask} type="button" className="btn btn-primary" data-dismiss="modal" id="saveEvent">Update</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Modal for Results Event */}
-            <div className="modal fade" id="eventModalUpdate" tabIndex={1} role="dialog" aria-labelledby="eventModalUpdateLabel" aria-hidden="true">
-                <div className="modal-dialog modal-lg" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="eventModalUpdateLabel">Results</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">×</span>
-                            </button>
-
-                        </div>
-
-                        <div className="modal-body">
-                            <div className="form-group">
-                                <label htmlFor="filter-select">Filter Results</label>
-                                <select
-                                    className="form-control"
-                                    id="filter-select"
-                                    value={filter}
-                                    onChange={(e) => handleFilterChange(e)}
-                        
-                                >
-                                    <option value="success">success</option>
-                                    <option value="partial success">partial success</option>
-                                    <option value="failure">failure</option>
-                                </select>
-                            </div>
-                            {editingResults.map((result, index) => {
-                                // if (result.is_delete === false) {
-                                    return (
-                                        <div className="card mb-3" key={index}>
-                                            <div className="card-body">
-                                                <h6 className="card-title">Result {index + 1}</h6>
-                                                <div className="row">
-                                                    <button
-                                                        className="btn btn-danger btn-sm delete-button"
-                                                        onClick={(e) => {
-                                                            handleDeleteResult(result);
-                                                        }}
-                                                        data-dismiss="modal"
-                                                    >
-                                                        &times;
-                                                    </button>
-                                                    <div className="col-md-6">
-                                                        <div className="form-group">
-                                                            <label htmlFor={`description-${index}`}>Description</label>
-                                                            <input onChange={(e) => handleChangeInputResult(index, e)}
-                                                                type="text"
-                                                                className="form-control"
-                                                                name="description"
-                                                                id={`description-${index}`}
-                                                                value={result.description}
-
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <div className="form-group">
-                                                            <label htmlFor={`outcome-${index}`}>Outcome</label>
-                                                            <select onChange={(e) => handleChangeInputResult(index, e)}
-                                                                className="form-control"
-                                                                name="outcome"
-                                                                id={`outcome-${index}`}
-                                                                value={result.outcome}
-
-                                                            >
-                                                                <option value="success">success</option>
-                                                                <option value="partial success">partial success</option>
-                                                                <option value="failure">failure</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="row">
-                                                    <div className="col-md-6">
-                                                        <div className="form-group">
-                                                            <label htmlFor={`score-${index}`}>Score</label>
-                                                            <input
-                                                                onChange={(e) => handleChangeInputResult(index, e)}
-                                                                type="number"
-                                                                className="form-control"
-                                                                name="score"
-                                                                id={`score-${index}`}
-                                                                value={result.score}
-
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <div className="form-group">
-                                                            <label htmlFor={`createdAt-${index}`}>Time create</label>
-                                                            <input
-                                                                onChange={(e) => handleChangeInputResult(index, e)}
-                                                                type="datetime-local"
-                                                                className="form-control"
-                                                                id={`createdAt-${index}`}
-                                                                name="createdAt"
-                                                                value={new Date(result.createdAt)}
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )
-                                // }
-                            })}
-                            <PaginationResult pages={{ ...pagesResult, totalResult }} currentPage={currentPage} onPageChange={handlePageChange} />
-                            <div className="mt-3">
-                                <h6>Add New Result</h6>
-                                <div className="form-group">
-                                    <label htmlFor="new-description">Description</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="description"
-                                        id="new-description"
-                                        value={newResult.description}
-                                        onChange={handleInputResultChange}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="new-outcome">Outcome</label>
-                                    <select
-                                        className="form-control"
-                                        name="outcome"
-                                        id="new-outcome"
-                                        value={newResult.outcome}
-                                        onChange={handleInputResultChange}
-                                    >
-                                        <option value="success">success</option>
-                                        <option value="partial success">partial success</option>
-                                        <option value="failure">failure</option>
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="new-score">Score</label>
-                                    <input
-                                        type="number"
-                                        className="form-control"
-                                        name="score"
-                                        id="new-score"
-                                        value={newResult.score}
-                                        onChange={handleInputResultChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary btn-sm" data-dismiss="modal" onClick={clickAddResult} >Add Result</button>
-                            <button type="button" style={{}} className="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
-                            <button type="button" className="btn btn-secondary btn-sm" data-dismiss="modal" onClick={handleSaveChanges}>Save</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {/* Modal for Results Task */}
+            <ResultModal handleFilterChange={handleFilterChange} handleInputResultChange={handleInputResultChange} handleSortChange={handleSortChange} handleDeleteResult={handleDeleteResult} handleChangeInputResult={handleChangeInputResult} editingResults={editingResults} filter={filter} newResult={newResult} clickAddResult={clickAddResult} pagesResult={pagesResult} totalResult={totalResult} currentPage={currentPage} handlePageChange={handlePageChange} handleSaveChanges={handleSaveChanges} />
             <div className="row">
                 {tasksUser && tasksUser.map((task, index) => {
+
                     if (task.is_delete === false) {
                         return ((
-                            <div className="col-md-4 col-sm-6" key={index}>
-                                <div className="card" style={{ margin: "0 0 20px 0", width: "auto", height: "470px" }}>
-                                    {task.image && (
-                                        <img
-                                            src={task.image}
-                                            className="card-img-top img-fluid"
-                                            style={{ width: "100%", height: "200px", objectFit: "cover", borderRadius: "10px 10px 0 0" }}
-                                            alt="Task Image" onClick={() => handleButtonClick(task)}
-                                        />
-                                    )}
-                                    <div className="card-body" style={{ overflow: "hidden", height: "calc(100% - 200px)" }}>
+                            <>
+                                <div className="col-md-4 col-sm-6" key={index}>
+                                    <div className="card" style={{ margin: "0 0 20px 0", width: "auto", height: "470px" }}>
+                                        {task.image && (
+                                            <img
+                                                src={task.image}
+                                                className="card-img-top img-fluid"
+                                                style={{ width: "100%", height: "200px", objectFit: "cover", borderRadius: "10px 10px 0 0" }}
+                                                alt="Task Image" onClick={() => handleButtonClick(task)}
+                                            />
+                                        )}
+                                        <div className="card-body" style={{ overflow: "hidden", height: "calc(100% - 200px)" }}>
+                                            <button
+                                                className="btn btn-danger btn-sm delete-button"
+                                                style={{ position: "absolute", top: "10px", right: "10px" }}
+                                                data-toggle="modal" data-target="#comfirmDelTask"
+                                            >
+                                                &times;
+                                            </button>
+                                            <h5 className="card-title" onClick={() => handleButtonClick(task)}>{task.name} </h5>
+                                            <p className="card-text" onClick={() => handleButtonClick(task)}>{task.desc}</p>
+                                            <p className="card-text" onClick={() => handleButtonClick(task)}>
+                                                <small className="text-muted">
+                                                    {new Date(task.deadline).toLocaleString("en-US", {
+                                                        weekday: "short",
+                                                        day: "numeric",
+                                                        month: "short",
+                                                        year: "numeric",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                    })}
+                                                </small>
+                                            </p>
+                                            <div className="tags">
+                                                {task.tags && task.tags.map((tag, tagIndex) => (
+                                                    <span key={tagIndex} style={{ margin: "3px" }} className="badge badge-secondary">{tag}</span>
+                                                ))}
+                                            </div>
+                                        </div>
                                         <button
-                                            className="btn btn-danger btn-sm delete-button"
-                                            style={{ position: "absolute", top: "10px", right: "10px" }}
+                                            className="btn btn-primary btn-sm edit-button"
+                                            style={{ position: "absolute", bottom: "10px", left: "10px" }}
+                                            data-toggle="modal"
+                                            data-target="#editEventModal"
                                             onClick={(e) => {
-                                                e.stopPropagation();
-                                                clickDeleteTask(task);
+                                                setSelectedTask(task); // Set the task data for editing
                                             }}
                                         >
-                                            &times;
+                                            Edit
                                         </button>
-                                        <h5 className="card-title" onClick={() => handleButtonClick(task)}>{task.name} </h5>
-                                        <p className="card-text" onClick={() => handleButtonClick(task)}>{task.desc}</p>
-                                        <p className="card-text" onClick={() => handleButtonClick(task)}>
-                                            <small className="text-muted">
-                                                {new Date(task.deadline).toLocaleString("en-US", {
-                                                    weekday: "short",
-                                                    day: "numeric",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
-                                            </small>
-                                        </p>
-                                        <div className="tags">
-                                            {task.tags && task.tags.map((tag, tagIndex) => (
-                                                <span key={tagIndex} style={{ margin: "3px" }} className="badge badge-secondary">{tag}</span>
-                                            ))}
+                                    </div>
+                                </div>
+                                <div class="modal" id="comfirmDelTask" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirm delete task</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>You have confirmed that you want to delete?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-primary" data-dismiss="modal" onClick={(e) => {
+                                                    clickDeleteTask(task);
+                                                }}>Delete</button>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button
-                                        className="btn btn-primary btn-sm edit-button"
-                                        style={{ position: "absolute", bottom: "10px", left: "10px" }}
-                                        data-toggle="modal"
-                                        data-target="#editEventModal"
-                                        onClick={(e) => {
-                                            setSelectedTask(task); // Set the task data for editing
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
                                 </div>
-                            </div>
+                            </>
 
 
                         ))
@@ -896,6 +629,7 @@ const Home = () => {
                 )}
             </div>
             <Pagination pages={{ ...pages, total }} />
+
         </div>
     );
 };

@@ -31,7 +31,7 @@ const Pagination = ({ pages }) => {
     return (
         <>
             <ul className="pagination">
-                {pages.hasPrevPage && <li className="page-item"><Link className="page-link" to={formatUrl(pages.page - 1, keyword, startDate, endDate)}>Trang trước</Link></li>}
+                {pages.hasPrevPage && <li className="page-item"><Link className="page-link" to={formatUrl(pages.page - 1, keyword, startDate, endDate)}>Previous</Link></li>}
                 {renderPagesHtml().map((page, index) => (
                     page !== "..." ? (
                         <li key={index} className={`page-item ${pages.page === page ? "active" : ""}`}>
@@ -41,7 +41,7 @@ const Pagination = ({ pages }) => {
                         <li key={index} className="page-item"><span className="page-link">{page}</span></li>
                     )
                 ))}
-                {pages.hasNextPage && <li className="page-item"><Link className="page-link" to={formatUrl(pages.page + 1, keyword, startDate, endDate)}>Trang sau</Link></li>}
+                {pages.hasNextPage && <li className="page-item"><Link className="page-link" to={formatUrl(pages.page + 1, keyword, startDate, endDate)}>Next</Link></li>}
             </ul>
         </>
     );

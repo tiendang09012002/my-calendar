@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 const ItemTask = (item) => {
-    console.log(item.item);
     return (
 
         <button style={{ border: 'none', padding: 0, background: "none" }} id="button-edit" className="" data-toggle="modal" data-target="#eventModalUpdate">

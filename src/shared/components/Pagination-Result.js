@@ -1,15 +1,18 @@
 import { Link, useSearchParams, useLocation } from "react-router-dom";
 
-const PaginationResult = ({ pages }) => {
+const PaginationResult = ({ pages, currentPage, onPageChange }) => {
 
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const keyword = searchParams.get("name") || '';
     const totalPages = pages.total_page;
 
-    const formatUrl = (page) => {
-        return `${location.pathname}?page=${page}`;
-    };
+    
+    const clickPage = (page)=>{
+        // e.preventDefault();
+        console.log(page);
+        onPageChange(page);
+    }
 
     const renderPagesHtml = (delta = 2) => {
         const left = pages.page_current - delta;
@@ -29,17 +32,17 @@ const PaginationResult = ({ pages }) => {
     return (
         <>
             <ul className="pagination">
-                {pages.has_prev_page && <li className="page-item"><Link className="page-link" to={formatUrl(pages.page_current-1)}>Trang trước</Link></li>}
+                {pages.has_prev_page && <li className="page-item"><a className="page-link" to="" onClick={(e) => clickPage(pages.page_current - 1)}>Previous</a></li>}
                 {renderPagesHtml().map((page, index) => (
                     page !== "..." ? (
                         <li key={index} className={`page-item ${pages.page_current === page ? "active" : ""}`}>
-                            <Link className="page-link" to={formatUrl(page)}>{page}</Link>
+                            <a className="page-link" to="" onClick={(e) => clickPage(page)}>{page}</a>
                         </li>
                     ) : (
                         <li key={index} className="page-item"><span className="page-link">{page}</span></li>
                     )
                 ))}
-                {pages.has_next_page && <li className="page-item"><Link className="page-link" to={formatUrl(pages.page_current+1)}>Trang sau</Link></li>}
+                {pages.has_next_page && <li className="page-item"><a className="page-link" to="" onClick={(e) => clickPage(pages.page_current + 1)}>Next</a></li>}
             </ul>
         </>
     );
