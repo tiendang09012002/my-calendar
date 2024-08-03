@@ -1,5 +1,5 @@
 import moment from "moment";
-import PaginationResult from "./Pagination-Result";
+import PaginationResult from "../../shared/components/Pagination-Result";
 const ResultModal = ({ handleChangeInputResult, handleDeleteResult, handleFilterChange, handleInputResultChange, handleSortChange, filter, editingResults, newResult, clickAddResult, handleSaveChanges, pagesResult, totalResult, currentPage, handlePageChange }) => {
     return (
         <>
@@ -70,7 +70,7 @@ const ResultModal = ({ handleChangeInputResult, handleDeleteResult, handleFilter
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="card mb-3" key={index}>
+                                        <div style={{height:"300px"}} className="card mb-3" key={index}>
                                             <div className="card-body">
                                                 <h6 className="card-title">Result {index + 1}</h6>
                                                 <div className="row">
@@ -199,7 +199,6 @@ const ResultModal = ({ handleChangeInputResult, handleDeleteResult, handleFilter
                     </div>
                 </div>
             </div>
-
         </>
     )
 };

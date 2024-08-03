@@ -1,28 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useId } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
-import { getUserTasks, deleteTask, updateTask, addTask, searchTask, addResultTask, saveEditResult, deleteResult, resultTask } from "../../services/Api";
+import { getUserTasks, deleteTask, updateTask, addTask, addResultTask, saveEditResult, deleteResult, resultTask } from "../../services/Api";
 import Pagination from "../../shared/components/Pagination";
-import PaginationResult from "../../shared/components/Pagination-Result";
 import moment from "moment";
 import { toast } from "react-toastify";
-import ResultModal from "../../shared/components/ResultModal";
-import EditTaskModal from "../../shared/components/EditTaskModal";
-import AddTaskModal from "../../shared/components/AddTaskModal";
+import ResultModal from "./ResultModal";
+import EditTaskModal from "./EditTaskModal";
+import AddTaskModal from "./AddTaskModal";
 
 const Home = () => {
     // const userID = useSelector(({ Auth }) => Auth.login.userCurrent?.data?._id);
     const userId = "6655f61a814c7f6072791ce0";
     const [searchParams] = useSearchParams()
-    const keyword = searchParams.get('name')
     const page = searchParams.get('page') || 1;
     const filter = searchParams.get('filter') || '';
-    const sort = searchParams.get('sort_created_at') || '';
     const [sortResult, setSortResult] = React.useState("");
     const [filterResult, setFilterResult] = React.useState("");
     const [pages, setPages] = React.useState({});
     const [total, setTotal] = React.useState(0);
-    const [currentPage, setCurrentPage] = useState("");
     const [pagesResult, setPagesResult] = React.useState({});
     const [totalResult, setTotalResult] = React.useState(0);
     const [selectedTask, setSelectedTask] = useState(null);
@@ -35,56 +31,93 @@ const Home = () => {
         score: '',
         createdAt: new Date().toISOString().slice(0, 16)
     });
+    const [formFilter, setFormFilter] = useState({
+        startDate: '',
+        endDate: '',
+        priority: '',
+        difficulty: '',
+        is_completed: '',
+        tags: ''
+    });
     const [editingResults, setEditingResults] = useState([]);
-    const [startDate, setStartDate] = React.useState("");
-    const [endDate, setEndDate] = React.useState("");
     const [tasksUser, setTasksUser] = useState([]);
-    console.log(editingResults);
-    const handleStartDateChange = (event) => {
-        try {
-            return setStartDate(moment(event.target.value).format('YYYY-MM-DD'));
-        } catch (error) {
-            return console.log(error);
-        }
+
+    console.log(filterResult,sortResult);
+    
+    /**
+ * Hàm xử lý sự kiện thay đổi giá trị ngày bắt đầu.
+ * Cập nhật giá trị ngày bắt đầu trong formFilter với định dạng 'YYYY-MM-DD'.
+ * @param {Object} e - Sự kiện thay đổi từ trường ngày bắt đầu.
+ */
+    const handleStartDateChange = (e) => {
+        setFormFilter({
+            ...formFilter,
+            startDate: moment(e.target.value).format('YYYY-MM-DD')
+        });
     };
 
-    const handleEndDateChange = (event) => {
-        try {
-            return setEndDate(moment(event.target.value).format('YYYY-MM-DD'));
-        } catch (error) {
-            return console.log(error);
-        }
+    /**
+     * Hàm xử lý sự kiện thay đổi giá trị ngày kết thúc.
+     * Cập nhật giá trị ngày kết thúc trong formFilter với định dạng 'YYYY-MM-DD'.
+     * @param {Object} e - Sự kiện thay đổi từ trường ngày kết thúc.
+     */
+    const handleEndDateChange = (e) => {
+        setFormFilter({
+            ...formFilter,
+            endDate: moment(e.target.value).format('YYYY-MM-DD')
+        });
     };
 
+    /**
+     * Hàm xử lý thay đổi giá trị của các trường lọc trên form.
+     * @param {Object} e - Sự kiện thay đổi từ các trường nhập liệu.
+     */
+    const handleInputFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFormFilter({
+            ...formFilter,
+            [name]: value
+        });
+    };
+
+    /**
+     * Hàm xử lý sự kiện khi người dùng nhấp vào nút lọc.
+     * Thực hiện gọi API để lấy danh sách công việc của người dùng dựa trên các bộ lọc.
+     */
     const handleClickFilter = async () => {
         try {
-            const { data } = await searchTask({
+            const { data } = await getUserTasks(userId, {
                 params: {
+                    page,
                     name: searchKeyword,
-                    startDate: startDate,
-                    endDate: endDate,
+                    startDate: formFilter.startDate,
+                    endDate: formFilter.endDate,
+                    priority: formFilter.priority,
+                    difficulty: formFilter.difficulty,
+                    is_completed: formFilter.is_completed,
+                    tags: formFilter.tags
                 }
             });
             setTasksUser(data.data);
             setPages(data.pagination);
             setTotal(data.pagination.totalPages);
-            return;
+            return toast(data.msg);
         } catch (error) {
-            toast(error.message);
-            return console.log(error);
+            return toast(error.response.data.msg);
         }
     }
+
     /**
-    * Thay đổi trang hiện tại.
-    * @param {number} page - Số trang cần chuyển đến.
-    */
+     * Hàm xử lý thay đổi trang hiện tại khi người dùng thay đổi trang.
+     * @param {number} page - Số trang cần chuyển đến.
+     */
     const handlePageChange = async (page) => {
         try {
             const { data } = await resultTask(selectedTask._id, {
                 params: {
                     limit: 2,
                     outcome: filterResult || "",
-
+                    sort_created_at: sortResult || "",
                     page
                 }
             });
@@ -153,11 +186,11 @@ const Home = () => {
 
     /**
      * Cập nhật từ khóa tìm kiếm dựa trên input người dùng.
-     * @param {Object} event - Sự kiện thay đổi input.
+     * @param {Object} e - Sự kiện thay đổi input.
      */
-    const handleSearchChange = (event) => {
+    const handleSearchChange = (e) => {
         try {
-            return setSearchKeyword(event.target.value);
+            return setSearchKeyword(e.target.value);
         } catch (error) {
             return console.log(error);
         }
@@ -168,19 +201,24 @@ const Home = () => {
      */
     const handleSearchClick = async () => {
         try {
-            const { data } = await searchTask({
+            const { data } = await getUserTasks(userId, {
                 params: {
+                    page,
                     name: searchKeyword,
-                    startDate: startDate,
-                    endDate: endDate,
+                    startDate: formFilter.startDate,
+                    endDate: formFilter.endDate,
+                    priority: formFilter.priority,
+                    difficulty: formFilter.difficulty,
+                    is_completed: formFilter.is_completed,
+                    tags: formFilter.tags
                 }
             });
             setTasksUser(data.data);
             setPages(data.pagination);
             setTotal(data.pagination.totalPages);
-            return;
+            return toast(data.msg);
         } catch (error) {
-            return console.log(error);
+            return toast(error.response.data.msg);
         }
     };
 
@@ -208,6 +246,12 @@ const Home = () => {
                 params: {
                     page,
                     name: searchKeyword,
+                    startDate: formFilter.startDate,
+                    endDate: formFilter.endDate,
+                    priority: formFilter.priority,
+                    difficulty: formFilter.difficulty,
+                    is_completed: formFilter.is_completed,
+                    tags: formFilter.tags
                 }
             });
             console.log(data);
@@ -226,13 +270,12 @@ const Home = () => {
      */
     const clickDeleteTask = async (task) => {
         try {
-            console.log(task._id);
             await deleteTask(task._id, { delete_by: userId });
             renderTask();
             toast("Delete Success!")
             return;
         } catch (error) {
-            toast(error.message)
+            toast(error.response.data.msg);
             return console.log(error);
         }
     };
@@ -250,6 +293,7 @@ const Home = () => {
                 }
             });
             console.log(data);
+            
             setEditingResults(data.data);
             setPagesResult(data.paginationInfo);
             setTotalResult(data.paginationInfo.total_page);
@@ -271,6 +315,7 @@ const Home = () => {
                     limit: 2,
                     outcome: newFilter,
                     sort_created_at: sortResult,
+                    page
                 }
             });
             setEditingResults(data.data);
@@ -291,6 +336,7 @@ const Home = () => {
                     limit: 2,
                     sort_created_at: newSort,
                     outcome: filterResult,
+                    page
                 }
             });
             setEditingResults(data.data);
@@ -316,7 +362,7 @@ const Home = () => {
     };
 
     /**
-     * Chọn file để thêm vào nhiệm vụ mới.
+     * Choose file để thêm vào nhiệm vụ mới.
      * @param {Object} e - Sự kiện thay đổi file input.
      */
     const handleFileChange = (e) => {
@@ -372,7 +418,7 @@ const Home = () => {
     };
 
     /**
-     * Thay đổi giá trị trong input của thẻ đã chọn.
+     * Thay đổi giá trị trong input của thẻ đã Choose.
      * @param {Object} e - Sự kiện thay đổi input của thẻ.
      * @param {number} index - Vị trí của thẻ trong mảng tags.
      */
@@ -387,7 +433,7 @@ const Home = () => {
     };
 
     /**
-     * Thêm input thẻ mới cho nhiệm vụ đã chọn.
+     * Thêm input thẻ mới cho nhiệm vụ đã Choose.
      * @param {Object} e - Sự kiện bấm nút thêm thẻ.
      */
     const addTagInput = (e) => {
@@ -428,8 +474,7 @@ const Home = () => {
             toast("Add successfully!");
             return renderTask();
         } catch (error) {
-            toast(error.message);
-            return console.log(error.message);
+            return toast(error.response.data.msg);
         }
     };
 
@@ -446,13 +491,12 @@ const Home = () => {
             toast("Update task success!");
             return renderTask();
         } catch (error) {
-            toast(error.message);
-            return console.log(error);
+            return toast(error.response.data.msg);
         }
     };
 
     /**
-     * Thêm kết quả mới cho nhiệm vụ đã chọn.
+     * Thêm kết quả mới cho nhiệm vụ đã Choose.
      */
     const clickAddResult = async () => {
         try {
@@ -482,7 +526,7 @@ const Home = () => {
 
     useEffect(() => {
         renderTask();
-    }, [page, keyword, selectedTask]);
+    }, [page, selectedTask]);
 
 
     return (
@@ -492,17 +536,16 @@ const Home = () => {
                 <div className="row">
                     <div className="col-md-12">
                         <h2 className="text-center" id="monthly">Monthly Calendar</h2>
-                        <div id="calendar" />
+                        <div id="calendar"></div>
                     </div>
                 </div>
             </div>
-            {/* Button trigger modal */}
-            <button type="button" id="button-add" className="btn btn-success" data-toggle="modal" data-target="#eventModal">
-                Add Task
-            </button>
 
             <div className="input-group mt-3 mb-3">
                 <div className="search-container">
+                    <button type="button" id="button-add" class="btn btn-success" data-toggle="modal" data-target="#eventModal">
+                        <i class="bi bi-plus"></i> Add Task
+                    </button>
                     <input
                         type="text"
                         className="inputsearch"
@@ -511,27 +554,87 @@ const Home = () => {
                         aria-describedby="button-search"
                         onChange={handleSearchChange}
                     />
-                    <div className="input-group-append ">
+                    <div className="input-group-append">
                         <button
-                            className="btn btn-success btn-search "
+                            className="btn btn-success btn-search"
                             type="button"
                             id="button-search"
                             onClick={handleSearchClick}
                         >
-                            Search
+                            <i class="bi bi-search"></i>
+
                         </button>
                     </div>
+                    <button data-toggle="modal" data-target="#modalFilter" id="btn-filter" class="btn btn-info">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+
                 </div>
-
-
             </div>
 
-            <div className="date-picker-container">
-                <label htmlFor="start-date">Start Date:</label>
-                <input onChange={handleStartDateChange} type="date" id="start-date" name="start-date" />
-                <label htmlFor="end-date">End Date:</label>
-                <input onChange={handleEndDateChange} type="date" id="end-date" name="end-date" />
-                <button onClick={handleClickFilter}>Lọc</button>
+            <div className="modal fade" id="modalFilter" tabIndex={-1} role="dialog" aria-labelledby="modalFilterLabel" aria-hidden="true">
+                <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="modalFilterLabel">Modal Filter</h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="body-filter p-3 bg-light rounded shadow-sm">
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="start-date">Start Date:</label>
+                                        <input onChange={handleStartDateChange} type="date" id="start-date" name="start-date" className="form-control" />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="end-date">End Date:</label>
+                                        <input onChange={handleEndDateChange} type="date" id="end-date" name="end-date" className="form-control" />
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="priority">Priority:</label>
+                                        <select onChange={handleInputFilterChange} id="priority" name="priority" className="form-control">
+                                            <option value="">Choose</option>
+                                            <option value="high">High</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="low">Low</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="difficulty">Difficulty:</label>
+                                        <select onChange={handleInputFilterChange} id="difficulty" name="difficulty" className="form-control">
+                                            <option value="">Choose</option>
+                                            <option value="easy">Easy</option>
+                                            <option value="intermediate">Intermediate</option>
+                                            <option value="hard">Hard</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="is_completed">Status:</label>
+                                        <select onChange={handleInputFilterChange} id="is_completed" name="is_completed" className="form-control">
+                                            <option value="">Choose</option>
+                                            <option value="true">Completed</option>
+                                            <option value="false">Unfinished</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="tags">Tag:</label>
+                                        <input onChange={handleInputFilterChange} id="tags" name="tags" className="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" onClick={handleClickFilter} className="btn btn-primary">Filter</button>
+                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Modal for Add Event */}
@@ -541,7 +644,7 @@ const Home = () => {
             <EditTaskModal selectedTask={selectedTask} handleInputChange={handleInputChange} handleFileChange={handleFileChange} previewImage={previewImage} addTagInput={addTagInput} clickUpdateTask={clickUpdateTask} handleTagChange={handleTagChange} />
 
             {/* Modal for Results Task */}
-            <ResultModal handleFilterChange={handleFilterChange} handleInputResultChange={handleInputResultChange} handleSortChange={handleSortChange} handleDeleteResult={handleDeleteResult} handleChangeInputResult={handleChangeInputResult} editingResults={editingResults} filter={filter} newResult={newResult} clickAddResult={clickAddResult} pagesResult={pagesResult} totalResult={totalResult} currentPage={currentPage} handlePageChange={handlePageChange} handleSaveChanges={handleSaveChanges} />
+            <ResultModal handleFilterChange={handleFilterChange} handleInputResultChange={handleInputResultChange} handleSortChange={handleSortChange} handleDeleteResult={handleDeleteResult} handleChangeInputResult={handleChangeInputResult} editingResults={editingResults} filter={filter} newResult={newResult} clickAddResult={clickAddResult} pagesResult={pagesResult} totalResult={totalResult} handlePageChange={handlePageChange} handleSaveChanges={handleSaveChanges} />
             <div className="row">
                 {tasksUser && tasksUser.map((task, index) => {
 
@@ -621,8 +724,6 @@ const Home = () => {
                                     </div>
                                 </div>
                             </>
-
-
                         ))
                     }
                 }
